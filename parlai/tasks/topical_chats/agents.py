@@ -61,11 +61,13 @@ class TopicalChatsTeacher(FixedDialogTeacher):
                     distractor_conv_id = random.choice(conversation_ids)
                 distractor_turn = random.choice(data[distractor_conv_id]["content"])
 
+                candidates = [turns[i]["message"], distractor_turn["message"]]
+                random.shuffle(candidates)
                 turn_data = [
                     turns[i - 1]["message"],
                     turns[i]["message"],
-                    [turns[i]["message"], distractor_turn["message"]]
-                ]
+                    candidates
+                    ]
 
                 if i % 2 == 1:
                     conv_data.append(turn_data)
