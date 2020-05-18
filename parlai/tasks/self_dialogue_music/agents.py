@@ -1,13 +1,21 @@
 import hashlib
 import os
-from random import Random
+import random
 import pickle as pkl
 from parlai.core.teachers import FixedDialogTeacher
 
-def generate_file_splits(data_path, random_state=1337):
+random.seed(1337)
+
+def readlines(path):
+    with open(path, 'r') as data_file:
+        turns = [turn.strip() for turn in data_file.readlines()]
+    return turns
+
+
+def generate_file_splits(data_path):
     conversation_list = [file for file in os.listdir(data_path)
                          if '.txt' in file]  # We extract all text files
-    Random(random_state).shuffle(conversation_list)
+    random.shuffle(conversation_list)
 
     # Do a 80:10:10 split
     TRAIN_SIZE = 0.8
@@ -34,17 +42,30 @@ def preprocess_conversations(data_path):
         conversations = []
 
         for file in files:
-            with open(os.path.join(data_path, file), 'r') as data_file:
-                turns = [turn.strip() for turn in data_file.readlines()]
+            turns = readlines(os.path.join(data_path, file))
 
             conversation = []
-            for i in range(1, len(turns), 2):
-                conversation.append([
+            reverse_conversation = []
+
+            for i in range(1, len(turns)):
+                sample_file = random.choice(files)
+                if sample_file == file:
+                    sample_file = random.choice(files)
+
+                random_distractor = random.choice(readlines(os.path.join(data_path, file)))
+
+                turn_data = [
                     turns[i - 1],
-                    turns[i]
-                ])
+                    turns[i],
+                    [random_distractor, turns[i]]  # Label candidates
+                ]
+                if i % 2 == 1:
+                    conversation.append(turn_data)
+                else:
+                    reverse_conversation.append(turn_data)
 
             conversations.append(conversation)
+            conversations.append(reverse_conversation)
 
         with open(os.path.join(data_path, f'{split}.pkl'), 'wb') as split_file:
             pkl.dump(conversations, split_file)
@@ -107,6 +128,7 @@ class SelfDialogueMusicTeacher(FixedDialogTeacher):
         action = {
             'text': ep_i[0],
             'labels': [ep_i[1]],
+            'label_candidates': ep_i[2],
             'episode_done': episode_done
         }
 
