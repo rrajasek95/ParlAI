@@ -1,7 +1,10 @@
 import json
 import os
+import random
 
 from parlai.core.teachers import FixedDialogTeacher
+
+random.seed(1337)
 
 class TopicalChatsTeacher(FixedDialogTeacher):
     def __init__(self, opt, shared=None):
@@ -48,17 +51,29 @@ class TopicalChatsTeacher(FixedDialogTeacher):
 
         for conversation_id in conversation_ids:
             conv_data = []
-            prev_turn_data = None
-            for (turn, turn_data) in enumerate(data[conversation_id]["content"]):
-                if turn % 2 == 1:
-                    conv_data.append([
-                        prev_turn_data["message"],  # text (agent 1)
-                        turn_data["message"],  # label (agent 2)
-                    ])
-                prev_turn_data = turn_data
+            reverse_conversation = []
 
+            turns = data[conversation_id]["content"]
 
-            self.data.append(conv_data)  # Load conversation-wise
+            for i in range(1, len(turns)):
+                distractor_conv_id = random.choice(conversation_ids)
+                if distractor_conv_id == conversation_id:
+                    distractor_conv_id = random.choice(conversation_ids)
+                distractor_turn = random.choice(data[distractor_conv_id]["content"])
+
+                turn_data = [
+                    turns[i - 1]["message"],
+                    turns[i]["message"],
+                    [turns[i]["message"], distractor_turn["message"]]
+                ]
+
+                if i % 2 == 1:
+                    conv_data.append(turn_data)
+                else:
+                    reverse_conversation.append(turn_data)
+
+            self.data.append(conv_data) # Load conversation-wise
+            self.data.append(reverse_conversation)
 
     def get(self, episode_idx, entry_idx=0):
         ep = self.data[episode_idx]
@@ -68,6 +83,7 @@ class TopicalChatsTeacher(FixedDialogTeacher):
         action = {
             'text': ep_i[0],
             'labels': [ep_i[1]],
+            'label_candidates': ep_i[2],
             'episode_done': episode_done
         }
 
