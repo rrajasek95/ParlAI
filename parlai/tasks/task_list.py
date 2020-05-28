@@ -1144,4 +1144,45 @@ task_list = [
             "<https://arxiv.org/abs/1911.03842>."
         ),
     },
+    {
+        "id": "ReDial",
+        "display_name": "ReDial",
+        "task": "redial",
+        "tags": ["All", "ChitChat", "Goal"],
+        "description": (
+            "Annotated dataset of dialogues where users recommend movies to eachother."
+            "See https://redialdata.github.io/website/ for more information."
+        ),
+    },
+    {
+        "id": "DREAM",
+        "display_name": "DREAM",
+        "task": "dream",
+        "tags": ["All", "QA"],
+        "description": (
+            "A multiple-choice answering dataset based on multi-turn, multi-party dialogue."
+            "More information can be found at: <https://dataset.org/dream/>."
+        ),
+    },
+    {
+        "id": "C3",
+        "display_name": "C3",
+        "task": "c3",
+        "tags": ["All", "QA"],
+        "description": (
+            "A multiple-choice answering dataset in Chinese based on a prior passage."
+            "More information can be found at: <https://dataset.org/c3/>."
+        ),
+    },
+    {
+        "id": "CommonSenseQA",
+        "display_name": "CommonSenseQA",
+        "task": "commonsenseqa",
+        "tags": ["All", "QA"],
+        "description": (
+            "CommonSenseQA is a multiple-choice Q-A dataset that relies on commonsense "
+            "knowlegde to predict correct answers. More information found at "
+            "<https://www.tau-nlp.org/commonsenseqa>."
+        ),
+    },
 ]
